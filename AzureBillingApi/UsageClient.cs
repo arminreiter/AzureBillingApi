@@ -90,7 +90,7 @@ namespace CodeHollow.AzureBillingApi
             {
                 string next = GetData(usageData.NextLink, token);
                 var nextUsageData = JsonConvert.DeserializeObject<UsageData>(next);
-                usageData.Value.AddRange(nextUsageData.Value);
+                usageData.Values.AddRange(nextUsageData.Values);
                 usageData.NextLink = nextUsageData.NextLink;
             }
 

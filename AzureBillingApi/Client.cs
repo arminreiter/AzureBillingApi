@@ -124,19 +124,64 @@ namespace CodeHollow.AzureBillingApi
         {
             List<ResourceCosts> costs = new List<ResourceCosts>();
 
-            foreach (var usageValue in usageData.Value)
+            // get all used meter ids
+            var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
+            
+            // aggregates all quantity and will be used to calculate costs (e.g. if quantity is included for free)
+            Dictionary<string, double> aggregatedQuantity = meterIds.ToDictionary(x => x, x => 0.0);
+            
+
+            foreach (var usageValue in usageData.Values)
             {
                 string meterId = usageValue.Properties.MeterId;
-                var v = from x in rateCardData.Meters where x.MeterId == meterId select x;
-                var meter = v.First();
+                var rateCard = (from x in rateCardData.Meters where x.MeterId == meterId select x).First();
 
-                costs.Add(new ResourceCosts()
+                var usedQuantity = aggregatedQuantity[meterId];
+
+                // if quantity is included AND included quantity isn't already used
+                if (rateCard.IncludedQuantity > 0 && usedQuantity < rateCard.IncludedQuantity)
                 {
-                    RateCardMeter = meter,
-                    UsageValue = usageValue,
-                    Costs = usageValue.Properties.Quantity * meter.MeterRates.First().Value
-                });
+                    // how much of the included quantity is still available?
+                    var stillOpen = rateCard.IncludedQuantity - usedQuantity;
+
+                    // is the quantity of the current meter included or is it already out of the included quantity?
+                    // if used quantity of meter is higher than the included ones - 
+                    if (usageValue.Properties.Quantity > stillOpen)
+                    {
+                        double toAdd = usageValue.Properties.Quantity - stillOpen;
+                        var calculatedCosts = toAdd * rateCard.MeterRates.First().Value; // TODO: select correct meter rate
+
+                        costs.Add(new ResourceCosts()
+                        {
+                            RateCardMeter = rateCard,
+                            UsageValue = usageValue,
+                            Costs = calculatedCosts
+                        });
+                    }
+                    else // quantity is still part of the included ones and therefore for free 
+                    {
+                        costs.Add(new ResourceCosts()
+                        {
+                            RateCardMeter = rateCard,
+                            UsageValue = usageValue,
+                            Costs = 0
+                        });
+                    }
+                    
+                }
+                else
+                {
+                    costs.Add(new ResourceCosts()
+                    {
+                        RateCardMeter = rateCard,
+                        UsageValue = usageValue,
+                        Costs = usageValue.Properties.Quantity * rateCard.MeterRates.First().Value
+                    });
+                }
+
+                aggregatedQuantity[meterId] += usageValue.Properties.Quantity;
             }
+            
             return costs;
         }
 

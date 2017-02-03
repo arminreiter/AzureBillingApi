@@ -10,5 +10,13 @@ namespace CodeHollow.AzureBillingApi.Usage
         public string Location { get; set; }
         public string PartNumber { get; set; }
         public string OrderNumber { get; set; }
+
+        public string ResourceName
+        {
+            get
+            {
+                return ResourceUri.Substring(ResourceUri.LastIndexOf('/') + 1);
+            }
+        }
     }
 }

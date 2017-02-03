@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.Usage
 {
     public class UsageData
     {
-        public List<UsageValue> Value { get; set; }
+        [JsonProperty("value")]
+        public List<UsageValue> Values { get; set; }
 
         /// <summary>
         /// returns the full url, including query parameters and continuation token
