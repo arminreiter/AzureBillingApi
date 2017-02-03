@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureBillingApi", "AzureBillingApi\AzureBillingApi.csproj", "{EA1352EE-05DC-4937-830F-50C080C213CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureBillingApi.ConsoleSample", "AzureBillingApi.ConsoleSample\AzureBillingApi.ConsoleSample.csproj", "{79D8D46C-3FE0-44BE-9E41-D37703479EED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA1352EE-05DC-4937-830F-50C080C213CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA1352EE-05DC-4937-830F-50C080C213CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA1352EE-05DC-4937-830F-50C080C213CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA1352EE-05DC-4937-830F-50C080C213CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
