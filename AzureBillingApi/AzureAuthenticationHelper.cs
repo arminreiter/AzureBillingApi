@@ -3,6 +3,9 @@ using System;
 
 namespace CodeHollow.AzureBillingApi
 {
+    /// <summary>
+    /// Helps to authenticate (get the OAuth token) at Azure.
+    /// </summary>
     public static class AzureAuthenticationHelper
     {
         /// <summary>

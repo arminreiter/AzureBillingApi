@@ -3,8 +3,14 @@ using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.Usage
 {
+    /// <summary>
+    /// The usage data that comes from the usage api.
+    /// </summary>
     public class UsageData
     {
+        /// <summary>
+        /// The usage values.
+        /// </summary>
         [JsonProperty("value")]
         public List<UsageValue> Values { get; set; }
 

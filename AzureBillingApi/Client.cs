@@ -14,11 +14,34 @@ namespace CodeHollow.AzureBillingApi
     /// </summary>
     public class Client
     {
+        #region Properties
+
+        /// <summary>
+        /// The tenant - e.g. mytenant.onmicrosoft.com
+        /// </summary>
         protected string Tenant { get; set; }
+
+        /// <summary>
+        /// The client id (application id in the new azure portal)
+        /// </summary>
         protected string ClientId { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected string ClientSecret { get; set; }
+
+        /// <summary>
+        /// The subscription id
+        /// </summary>
         protected string SubscriptionId { get; set; }
+
+        /// <summary>
+        /// The redirect url
+        /// </summary>
         protected string RedirectUrl { get; set; }
+
+        #endregion
 
         /// <summary>
         /// Creates the client to read data from the billing REST APIs. Uses user authentication for 
@@ -103,14 +126,14 @@ namespace CodeHollow.AzureBillingApi
         /// <param name="showDetails">Include instance-level details or not</param>
         /// <param name="token">the OAuth token</param>
         /// <returns>The costs of the resources (combined data of ratecard and usage api)</returns>
-        public List<ResourceCosts> GetResourceCosts(string offerDurableId, string currency, string locale, string regionInfo, DateTime startDate, DateTime enddate, AggregationGranularity granularity, bool showDetail, string token = null)
+        public List<ResourceCosts> GetResourceCosts(string offerDurableId, string currency, string locale, string regionInfo, DateTime startDate, DateTime endDate, AggregationGranularity granularity, bool showDetails, string token = null)
         {
             if(string.IsNullOrEmpty(token))
             {
                 token = AzureAuthenticationHelper.GetOAuthTokenFromAAD(Globals.SERVICEURL, Tenant, Globals.RESOURCE, RedirectUrl, ClientId, ClientSecret);
             }
             var rateCardData = GetRateCardData(offerDurableId, currency, locale, regionInfo, token);
-            var usageData = GetUsageData(startDate, enddate, granularity, showDetail, token);
+            var usageData = GetUsageData(startDate, endDate, granularity, showDetails, token);
             return Combine(rateCardData, usageData);
         }
 
