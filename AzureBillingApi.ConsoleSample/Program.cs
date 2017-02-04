@@ -13,29 +13,29 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
         static void Main(string[] args)
         {
             Client c = new Client(
-                "xxx.onmicrosoft.com",
+                "mytenant.onmicrosoft.com",
                 "[CLIENTID]",
                 "[CLIENTSECRET]",
                 "[SUBSCRIPTIONID]",
-                "http://localhost/billingapi");
+                "http://[REDIRECTURL]");
 
             // How to get ratecard and usage data separated and combine it:
-            /* 
+            /*
             var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
             var ratecardData = c.GetRateCardData("MS-AZR-0003p", "EUR", "de-AT", "AT");
-            var combined = Client.Combine(usageData, ratecardData);
+            var combined = Client.Combine(ratecardData, usageData);
             */
 
             Console.WriteLine("Resource costs: ");
 
-            var resourceCosts = c.GetResourceCosts("MS-AZR-0003p", "EUR", "en-US", "AT",
-                new DateTime(2016, 11, 14, 0, 0, 0), new DateTime(2016, 12, 13, 23, 0, 0), AggregationGranularity.Hourly, true);
+            var resourceCosts = c.GetResourceCosts("MS-AZR-0003p", "USD", "en-US", "US",
+                new DateTime(2016, 11, 14, 0, 0, 0), new DateTime(2016, 12, 13, 23, 0, 0), AggregationGranularity.Daily, true);
 
-            var costs = from x in resourceCosts select x.Costs;
+            var costs = from x in resourceCosts.Costs select x.CalculatedCosts;
             var totalCosts = costs.Sum();
 
-            Console.WriteLine(totalCosts + " EUR");
-            PrintMeters(resourceCosts);
+            Console.WriteLine(totalCosts + " " + resourceCosts.RateCardData.Currency);
+            PrintMeters(resourceCosts.Costs);
 
             // Create CSV:
             //var rccsv = CreateCsv(combined.Select(x => x.RateCardMeter).ToList());
@@ -109,7 +109,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             {
                 var currates = (from y in resourceCosts where y.RateCardMeter.MeterId.Equals(x) select y);
                 string metername = currates.First().UsageValue.Properties.MeterName;
-                var curcosts = currates.Sum(y => y.Costs);
+                var curcosts = currates.Sum(y => y.CalculatedCosts);
                 var billable = currates.Sum(y => y.BillableUnits);
                 var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
 
@@ -132,7 +132,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 {
                     var currates = (from y in resourceValues where y.RateCardMeter.MeterId.Equals(x) select y);
                     string metername = currates.First().UsageValue.Properties.MeterName;
-                    var curcosts = currates.Sum(y => y.Costs);
+                    var curcosts = currates.Sum(y => y.CalculatedCosts);
                     var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
 
                     var curusagevalue = currates.First().UsageValue;

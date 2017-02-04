@@ -21,7 +21,7 @@ namespace CodeHollow.AzureBillingApi
         /// <summary>
         /// Calculated costs.
         /// </summary>
-        public double Costs { get; set; }
+        public double CalculatedCosts { get; set; }
 
         /// <summary>
         /// The units which are not for free.

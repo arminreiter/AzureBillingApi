@@ -126,7 +126,7 @@ namespace CodeHollow.AzureBillingApi
         /// <param name="showDetails">Include instance-level details or not</param>
         /// <param name="token">the OAuth token</param>
         /// <returns>The costs of the resources (combined data of ratecard and usage api)</returns>
-        public List<ResourceCosts> GetResourceCosts(string offerDurableId, string currency, string locale, string regionInfo, DateTime startDate, DateTime endDate, AggregationGranularity granularity, bool showDetails, string token = null)
+        public ResourceCostData GetResourceCosts(string offerDurableId, string currency, string locale, string regionInfo, DateTime startDate, DateTime endDate, AggregationGranularity granularity, bool showDetails, string token = null)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -143,9 +143,13 @@ namespace CodeHollow.AzureBillingApi
         /// <param name="rateCardData">RateCard data</param>
         /// <param name="usageData">Usage data</param>
         /// <returns>The costs of the resources (combined data of ratecard and usage api)</returns>
-        public static List<ResourceCosts> Combine(RateCard.RateCardData rateCardData, Usage.UsageData usageData)
+        public static ResourceCostData Combine(RateCard.RateCardData rateCardData, Usage.UsageData usageData)
         {
-            List<ResourceCosts> costs = new List<ResourceCosts>();
+            ResourceCostData rcd = new ResourceCostData();
+            rcd.Costs = new List<ResourceCosts>();
+            rcd.RateCardData = rateCardData;
+
+            //List<ResourceCosts> costs = new List<ResourceCosts>();
 
             // get all used meter ids
             var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
@@ -164,16 +168,16 @@ namespace CodeHollow.AzureBillingApi
 
                 aggregatedQuantity[meterId] += usageValue.Properties.Quantity;
 
-                costs.Add(new ResourceCosts()
+                rcd.Costs.Add(new ResourceCosts()
                 {
                     RateCardMeter = rateCard,
                     UsageValue = usageValue,
-                    Costs = curcosts.Item1,
+                    CalculatedCosts = curcosts.Item1,
                     BillableUnits = curcosts.Item2
                 });
             }
 
-            return costs;
+            return rcd;
         }
 
         /// <summary>

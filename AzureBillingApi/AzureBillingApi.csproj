@@ -60,6 +60,7 @@
     <Compile Include="RateCardClient.cs" />
     <Compile Include="RateCard\Meter.cs" />
     <Compile Include="RateCard\RateCardData.cs" />
+    <Compile Include="ResourceCostData.cs" />
     <Compile Include="UsageClient.cs" />
     <Compile Include="ResourceCosts.cs" />
     <Compile Include="Usage\AggregationGranularity.cs" />
