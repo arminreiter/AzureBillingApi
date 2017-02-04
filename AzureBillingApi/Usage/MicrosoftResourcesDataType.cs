@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.Usage
 {
     /// <summary>
     /// Microsoft.Resources value of the usage aggregate.
     /// </summary>
+    [Serializable]
     public class MicrosoftResourcesDataType
     {
         /// <summary>

@@ -128,7 +128,7 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>The costs of the resources (combined data of ratecard and usage api)</returns>
         public List<ResourceCosts> GetResourceCosts(string offerDurableId, string currency, string locale, string regionInfo, DateTime startDate, DateTime endDate, AggregationGranularity granularity, bool showDetails, string token = null)
         {
-            if(string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token))
             {
                 token = AzureAuthenticationHelper.GetOAuthTokenFromAAD(Globals.SERVICEURL, Tenant, Globals.RESOURCE, RedirectUrl, ClientId, ClientSecret);
             }
@@ -149,10 +149,9 @@ namespace CodeHollow.AzureBillingApi
 
             // get all used meter ids
             var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
-            
+
             // aggregates all quantity and will be used to calculate costs (e.g. if quantity is included for free)
             Dictionary<string, double> aggregatedQuantity = meterIds.ToDictionary(x => x, x => 0.0);
-            
 
             foreach (var usageValue in usageData.Values)
             {
@@ -161,50 +160,19 @@ namespace CodeHollow.AzureBillingApi
 
                 var usedQuantity = aggregatedQuantity[meterId];
 
-                // if quantity is included AND included quantity isn't already used
-                if (rateCard.IncludedQuantity > 0 && usedQuantity < rateCard.IncludedQuantity)
-                {
-                    // how much of the included quantity is still available?
-                    var stillOpen = rateCard.IncludedQuantity - usedQuantity;
-
-                    // is the quantity of the current meter included or is it already out of the included quantity?
-                    // if used quantity of meter is higher than the included ones - 
-                    if (usageValue.Properties.Quantity > stillOpen)
-                    {
-                        double toAdd = usageValue.Properties.Quantity - stillOpen;
-                        var calculatedCosts = toAdd * rateCard.MeterRates.First().Value; // TODO: select correct meter rate
-
-                        costs.Add(new ResourceCosts()
-                        {
-                            RateCardMeter = rateCard,
-                            UsageValue = usageValue,
-                            Costs = calculatedCosts
-                        });
-                    }
-                    else // quantity is still part of the included ones and therefore for free 
-                    {
-                        costs.Add(new ResourceCosts()
-                        {
-                            RateCardMeter = rateCard,
-                            UsageValue = usageValue,
-                            Costs = 0
-                        });
-                    }
-                    
-                }
-                else
-                {
-                    costs.Add(new ResourceCosts()
-                    {
-                        RateCardMeter = rateCard,
-                        UsageValue = usageValue,
-                        Costs = usageValue.Properties.Quantity * rateCard.MeterRates.First().Value
-                    });
-                }
+                var curcosts = GetMeterRate(rateCard.MeterRates, rateCard.IncludedQuantity, usedQuantity, usageValue.Properties.Quantity);
 
                 aggregatedQuantity[meterId] += usageValue.Properties.Quantity;
+
+                costs.Add(new ResourceCosts()
+                {
+                    RateCardMeter = rateCard,
+                    UsageValue = usageValue,
+                    Costs = curcosts.Item1,
+                    BillableUnits = curcosts.Item2
+                });
             }
-            
+
             return costs;
         }
 
@@ -229,12 +197,61 @@ namespace CodeHollow.AzureBillingApi
                 var x = response.Content.ReadAsStringAsync();
                 x.Wait();
                 errorMsg += "Content: " + x.Result;
-                throw new Exception(errorMsg); // TODO: create own exception
+                throw new Exception(errorMsg);
             }
 
             var readTask = response.Content.ReadAsStringAsync();
             readTask.Wait();
             return readTask.Result;
+        }
+
+
+        /// <summary>
+        /// Returns the costs for the given quantityToAdd
+        /// </summary>
+        /// <param name="meterRates">List of the meter rates</param>
+        /// <param name="includedQuantity">Amount of included quantity (which is for free)</param>
+        /// <param name="totalUsedQuantity">The already use quantity in the period</param>
+        /// <param name="quantityToAdd">the quantity for which the calculation should be done</param>
+        /// <returns>Tuple - Item1 = costs, Item2 = billableQuantity</returns>
+        private static Tuple<double, double> GetMeterRate(Dictionary<double, double> meterRates, double includedQuantity, double totalUsedQuantity, double quantityToAdd)
+        {
+            Dictionary<double, double> modifiedMeterRates;
+
+            // add included quantity to meter rates with cost 0
+            if (includedQuantity > 0)
+            {
+                modifiedMeterRates = new Dictionary<double, double>();
+                modifiedMeterRates.Add(0, 0);
+
+                foreach (var rate in meterRates)
+                {
+                    modifiedMeterRates.Add(rate.Key + includedQuantity, rate.Value);
+                }
+            }
+            else
+                modifiedMeterRates = meterRates;
+
+
+            double costs = 0.0;
+            double billableQuantity = 0.0;
+
+            for (int i = modifiedMeterRates.Count; i > 0; i--)
+            {
+                var totalNew = totalUsedQuantity + quantityToAdd;
+                var rate = modifiedMeterRates.ElementAt(i - 1);
+
+                var tmp = quantityToAdd - rate.Key;
+
+                if (tmp > 0)
+                {
+                    costs += tmp * rate.Value;
+                    if (rate.Value > 0)
+                        billableQuantity += tmp;
+                    quantityToAdd -= tmp;
+                }
+            }
+            return new Tuple<double, double>(costs, billableQuantity);
         }
     }
 }

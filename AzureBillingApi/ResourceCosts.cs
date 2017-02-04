@@ -1,8 +1,11 @@
-﻿namespace CodeHollow.AzureBillingApi
+﻿using System;
+
+namespace CodeHollow.AzureBillingApi
 {
     /// <summary>
     /// Costs of the resources - combination of usage data and ratecard data with calculated costs.
     /// </summary>
+    [Serializable]
     public class ResourceCosts
     {
         /// <summary>
@@ -19,5 +22,10 @@
         /// Calculated costs.
         /// </summary>
         public double Costs { get; set; }
+
+        /// <summary>
+        /// The units which are not for free.
+        /// </summary>
+        public double BillableUnits { get; set; }
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.RateCard
 {
     /// <summary>
     /// Meter information, contains region, tags, rates and others
     /// </summary>
+    [Serializable]
     public class Meter
     {
         /// <summary>

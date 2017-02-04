@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.RateCard
 {
@@ -6,6 +7,7 @@ namespace CodeHollow.AzureBillingApi.RateCard
     /// RateCard data from the azure billing ratecard api.
     /// according to specification: https://msdn.microsoft.com/en-us/library/azure/mt219004.aspx
     /// </summary>
+    [Serializable]
     public class RateCardData
     {
         /// <summary>

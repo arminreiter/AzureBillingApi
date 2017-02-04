@@ -1,8 +1,11 @@
-﻿namespace CodeHollow.AzureBillingApi.Usage
+﻿using System;
+
+namespace CodeHollow.AzureBillingApi.Usage
 {
     /// <summary>
     /// Info fields of the usage aggregate - key value pairs of instance details.
     /// </summary>
+    [Serializable]
     public class InfoFields
     {
         /// <summary>

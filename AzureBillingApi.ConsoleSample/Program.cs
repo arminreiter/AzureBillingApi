@@ -28,32 +28,14 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 
             Console.WriteLine("Resource costs: ");
 
-            var resourceCosts = c.GetResourceCosts("MS-AZR-0003p", "EUR", "en-US", "AT", new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, AggregationGranularity.Daily, true);
-            
+            var resourceCosts = c.GetResourceCosts("MS-AZR-0003p", "EUR", "en-US", "AT",
+                new DateTime(2016, 11, 14, 0, 0, 0), new DateTime(2016, 12, 13, 23, 0, 0), AggregationGranularity.Hourly, true);
+
             var costs = from x in resourceCosts select x.Costs;
             var totalCosts = costs.Sum();
 
             Console.WriteLine(totalCosts + " EUR");
-
-            
-            var resourceNames = (from x in resourceCosts select x.UsageValue.ResourceName).Distinct();
-
-            foreach (var resource in resourceNames)
-            {
-                var resourceValues = resourceCosts.Where(x => x.UsageValue.ResourceName.Equals(resource));
-                var meterIds = (from x in resourceValues select x.RateCardMeter.MeterId).Distinct();
-
-                foreach (var x in meterIds)
-                {
-                    var currates = (from y in resourceValues where y.RateCardMeter.MeterId.Equals(x) select y);
-                    var curcosts = currates.Sum(y => y.Costs);
-
-                    var curusagevalue = currates.First().UsageValue;
-                    var resourceName = curusagevalue.Properties.InstanceData.MicrosoftResources.ResourceName;
-
-                    Console.WriteLine(resourceName.PadRight(20) + ": " + currates.First().UsageValue.Properties.MeterName.PadRight(72) + " : " + curcosts.ToString("0.################"));
-                }
-            }
+            PrintMeters(resourceCosts);
 
             // Create CSV:
             //var rccsv = CreateCsv(combined.Select(x => x.RateCardMeter).ToList());
@@ -117,6 +99,47 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             });
 
             return sb.ToString();
+        }
+
+        private static void PrintMeters(List<ResourceCosts> resourceCosts)
+        {
+            var meterIds = (from x in resourceCosts select x.RateCardMeter.MeterId).Distinct();
+
+            foreach (var x in meterIds)
+            {
+                var currates = (from y in resourceCosts where y.RateCardMeter.MeterId.Equals(x) select y);
+                string metername = currates.First().UsageValue.Properties.MeterName;
+                var curcosts = currates.Sum(y => y.Costs);
+                var billable = currates.Sum(y => y.BillableUnits);
+                var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
+
+                var curusagevalue = currates.First().UsageValue;
+
+                Console.WriteLine($"{metername.PadRight(72)} : {usage.ToString("0.################")} ({billable.ToString("0.################")}) - {curcosts.ToString("0.################")}");
+            }
+        }
+
+        private static void PrintResources(List<ResourceCosts> resourceCosts)
+        {
+            var resourceNames = (from x in resourceCosts select x.UsageValue.ResourceName).Distinct();
+
+            foreach (var resource in resourceNames)
+            {
+                var resourceValues = resourceCosts.Where(x => x.UsageValue.ResourceName.Equals(resource));
+                var meterIds = (from x in resourceValues select x.RateCardMeter.MeterId).Distinct();
+
+                foreach (var x in meterIds)
+                {
+                    var currates = (from y in resourceValues where y.RateCardMeter.MeterId.Equals(x) select y);
+                    string metername = currates.First().UsageValue.Properties.MeterName;
+                    var curcosts = currates.Sum(y => y.Costs);
+                    var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
+
+                    var curusagevalue = currates.First().UsageValue;
+
+                    Console.WriteLine(resource.PadRight(20) + ": " + metername.PadRight(72) + " : " + usage.ToString("0.################") + " - " + curcosts.ToString("0.################"));
+                }
+            }
         }
     }
 }

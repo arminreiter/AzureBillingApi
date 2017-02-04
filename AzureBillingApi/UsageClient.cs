@@ -71,6 +71,12 @@ namespace CodeHollow.AzureBillingApi
 
             DateTimeOffset startTime = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, DateTimeKind.Utc);
             DateTimeOffset endTime = new DateTime(endDate.Year, endDate.Month, endDate.Day, 0, 0, 0, DateTimeKind.Utc);
+
+            if(granularity == AggregationGranularity.Hourly)
+            {
+                startTime = startTime.AddHours(startDate.Hour);
+                endTime = endTime.AddHours(endDate.Hour);
+            }
             
             string st = WebUtility.UrlEncode(startTime.ToString("yyyy-MM-ddTHH:mm:sszzz"));
             string et = WebUtility.UrlEncode(endTime.ToString("yyyy-MM-ddTHH:mm:sszzz"));

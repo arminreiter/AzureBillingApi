@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace CodeHollow.AzureBillingApi.Usage
 {
@@ -6,6 +7,7 @@ namespace CodeHollow.AzureBillingApi.Usage
     /// Usage properties of usage aggregates according to:
     /// https://msdn.microsoft.com/en-us/library/azure/mt219001.aspx
     /// </summary>
+    [Serializable]
     public class UsageProperties
     {
         /// <summary>

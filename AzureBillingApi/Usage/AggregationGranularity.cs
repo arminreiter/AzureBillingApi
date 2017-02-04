@@ -1,8 +1,11 @@
-﻿namespace CodeHollow.AzureBillingApi.Usage
+﻿using System;
+
+namespace CodeHollow.AzureBillingApi.Usage
 {
     /// <summary>
     /// AggregationGranularity for Usage REST API
     /// </summary>
+    [Serializable]
     public enum AggregationGranularity
     {
         /// <summary>

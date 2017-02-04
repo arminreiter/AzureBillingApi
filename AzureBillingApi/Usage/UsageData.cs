@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace CodeHollow.AzureBillingApi.Usage
@@ -6,6 +7,7 @@ namespace CodeHollow.AzureBillingApi.Usage
     /// <summary>
     /// The usage data that comes from the usage api.
     /// </summary>
+    [Serializable]
     public class UsageData
     {
         /// <summary>
