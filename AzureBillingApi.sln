@@ -12,6 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C221523C-7973-4B9D-8B87-D8AEBA8569D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{79C4D2F3-598F-4115-B6FA-CE356E4F106F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureBillingApi.Tests", "AzureBillingApi.Tests\AzureBillingApi.Tests.csproj", "{7D145849-5F0F-4409-AEB4-D11EB624D2C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,8 +32,16 @@ Global
 		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79D8D46C-3FE0-44BE-9E41-D37703479EED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D145849-5F0F-4409-AEB4-D11EB624D2C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D145849-5F0F-4409-AEB4-D11EB624D2C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D145849-5F0F-4409-AEB4-D11EB624D2C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D145849-5F0F-4409-AEB4-D11EB624D2C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{79D8D46C-3FE0-44BE-9E41-D37703479EED} = {C221523C-7973-4B9D-8B87-D8AEBA8569D8}
+		{7D145849-5F0F-4409-AEB4-D11EB624D2C8} = {79C4D2F3-598F-4115-B6FA-CE356E4F106F}
 	EndGlobalSection
 EndGlobal

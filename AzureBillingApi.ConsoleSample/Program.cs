@@ -21,7 +21,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[CLIENTSECRET]",
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
-
+            
             // How to get ratecard and usage data separated and combine it:
             /*
             var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
@@ -31,12 +31,12 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 
             Console.WriteLine("Resource costs: ");
 
-            var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0003p", "EUR", "de-AT", "AT",2016,11);
+            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0003p", "EUR", "de-AT", "AT",2016,11);
 
-            //var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
-            //    new DateTime(2016, 12, 14, 0, 0, 0), new DateTime(2017, 1, 1, 23, 0, 0), AggregationGranularity.Daily, true);
+            var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
+                new DateTime(2016, 11, 14, 0, 0, 0), new DateTime(2016, 12, 13, 23, 0, 0), AggregationGranularity.Hourly, true);
 
-            
+
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData);
             //PrintResources(resourceData);

@@ -191,18 +191,24 @@ namespace CodeHollow.AzureBillingApi
             var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
 
             // aggregates all quantity and will be used to calculate costs (e.g. if quantity is included for free)
-            Dictionary<string, double> aggregatedQuantity = meterIds.ToDictionary(x => x, x => 0.0);
+            // Dictionary<MeterId, Dictionary<YearAndMonthOfBillingCycle, aggregatedQuantity>>
+            Dictionary<string, Dictionary<string, double>> aggQuant = meterIds.ToDictionary(x => x, x => new Dictionary<string, double>());
+
 
             foreach (var usageValue in usageData.Values)
             {
                 string meterId = usageValue.Properties.MeterId;
                 var rateCard = (from x in rateCardData.Meters where x.MeterId == meterId select x).First();
 
-                var usedQuantity = aggregatedQuantity[meterId];
+                var billingCycleId = GetBillingCycleIdentifier(usageValue.Properties.UsageStartTimeAsDate);
+                if (!aggQuant[meterId].ContainsKey(billingCycleId))
+                    aggQuant[meterId].Add(billingCycleId, 0.0);
+
+                var usedQuantity = aggQuant[meterId][billingCycleId];
 
                 var curcosts = GetMeterRate(rateCard.MeterRates, rateCard.IncludedQuantity, usedQuantity, usageValue.Properties.Quantity);
 
-                aggregatedQuantity[meterId] += usageValue.Properties.Quantity;
+                aggQuant[meterId][billingCycleId] += usageValue.Properties.Quantity;
 
                 rcd.Costs.Add(new ResourceCosts()
                 {
@@ -273,20 +279,27 @@ namespace CodeHollow.AzureBillingApi
             
             double costs = 0.0;
             double billableQuantity = 0.0;
-
+            
             for (int i = modifiedMeterRates.Count; i > 0; i--)
             {
                 var totalNew = totalUsedQuantity + quantityToAdd;
                 var rate = modifiedMeterRates.ElementAt(i - 1);
+                
+                var tmp = totalNew - rate.Key;
 
-                var tmp = quantityToAdd - rate.Key;
-
-                if (tmp > 0)
+                if (tmp >= 0)
                 {
+                    if (tmp > quantityToAdd)
+                        tmp = quantityToAdd;
+
                     costs += tmp * rate.Value;
+
                     if (rate.Value > 0)
                         billableQuantity += tmp;
+
                     quantityToAdd -= tmp;
+                    if (quantityToAdd == 0)
+                        break;
                 }
             }
             return new Tuple<double, double>(costs, billableQuantity);
@@ -309,5 +322,14 @@ namespace CodeHollow.AzureBillingApi
             return startDate.AddDays(14 - startDate.Day);
         }
 
+
+        private static string GetBillingCycleIdentifier(DateTime date)
+        {
+            if (date.Day >= 14)
+                return date.Year.ToString() + date.Month.ToString();
+
+            var tmp = date.AddMonths(-1);
+            return tmp.Year.ToString() + tmp.Month.ToString();
+        }
     }
 }
