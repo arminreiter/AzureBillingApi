@@ -136,8 +136,16 @@ namespace CodeHollow.AzureBillingApi
                 token = AzureAuthenticationHelper.GetOAuthTokenFromAAD(Globals.SERVICEURL, Tenant, Globals.RESOURCE, RedirectUrl, ClientId, ClientSecret);
             }
             var rateCardData = GetRateCardData(offerDurableId, currency, locale, regionInfo, token);
-            var usageData = GetUsageData(startDate, endDate, granularity, showDetails, token);
-            return Combine(rateCardData, usageData);
+
+            // set startdate to the beginning of the period so that the cost calculation will be correct.
+            DateTime start = GetStartOfBillingCycle(startDate);
+
+            var usageData = GetUsageData(start, endDate, granularity, showDetails, token);
+            var calculated = Combine(rateCardData, usageData);
+
+            calculated.Costs = calculated.Costs.Where(x => x.UsageValue.Properties.UsageStartTimeAsDate >= startDate).ToList();
+
+            return calculated;
         }
 
         /// <summary>
@@ -178,9 +186,7 @@ namespace CodeHollow.AzureBillingApi
             ResourceCostData rcd = new ResourceCostData();
             rcd.Costs = new List<ResourceCosts>();
             rcd.RateCardData = rateCardData;
-
-            //List<ResourceCosts> costs = new List<ResourceCosts>();
-
+            
             // get all used meter ids
             var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
 
@@ -238,10 +244,9 @@ namespace CodeHollow.AzureBillingApi
             readTask.Wait();
             return readTask.Result;
         }
-
-
+        
         /// <summary>
-        /// Returns the costs for the given quantityToAdd
+        /// Returns the costs for the given quantityToAdd for one billing cycle.
         /// </summary>
         /// <param name="meterRates">List of the meter rates</param>
         /// <param name="includedQuantity">Amount of included quantity (which is for free)</param>
@@ -265,8 +270,7 @@ namespace CodeHollow.AzureBillingApi
             }
             else
                 modifiedMeterRates = meterRates;
-
-
+            
             double costs = 0.0;
             double billableQuantity = 0.0;
 
@@ -287,5 +291,23 @@ namespace CodeHollow.AzureBillingApi
             }
             return new Tuple<double, double>(costs, billableQuantity);
         }
+
+        /// <summary>
+        /// Returns the start of the billing cycle (the 14th of the month)
+        /// </summary>
+        /// <param name="startDate">Date from which the billing cycle beginning should be calculated</param>
+        /// <returns>Beginning of the billing cycle</returns>
+        private static DateTime GetStartOfBillingCycle(DateTime startDate)
+        {
+            // start is per default the 14th of the month
+            if (startDate.Day == 14)
+                return startDate;
+
+            if (startDate.Day < 14)
+                startDate = startDate.AddMonths(-1);
+
+            return startDate.AddDays(14 - startDate.Day);
+        }
+
     }
 }

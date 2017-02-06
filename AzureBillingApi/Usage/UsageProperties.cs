@@ -21,9 +21,19 @@ namespace CodeHollow.AzureBillingApi.Usage
         public string UsageStartTime { get; set; }
 
         /// <summary>
+        /// The UsageStartTime as DateTime.
+        /// </summary>
+        public DateTime UsageStartTimeAsDate {  get { return DateTime.Parse(UsageStartTime); } }
+
+        /// <summary>
         /// UTC end time for the usage bucket to which this usage aggregate belongs.
         /// </summary>
         public string UsageEndTime { get; set; }
+
+        /// <summary>
+        /// The UsageEndTime as DateTime.
+        /// </summary>
+        public DateTime UsageEndTimeAsDateTime { get { return DateTime.Parse(UsageEndTime); } }
 
         /// <summary>
         /// Unique ID for the resource that was consumed (aka ResourceID).
