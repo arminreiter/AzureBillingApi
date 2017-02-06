@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/codehollow/AzureBillingApi/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial release</releaseNotes>
+    <releaseNotes>Fixed issue with reading data from billing period and dates in the future.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>azure billing billingapi windowsazure microsoftazure managementapi azuremanagementapi</tags>
   </metadata>

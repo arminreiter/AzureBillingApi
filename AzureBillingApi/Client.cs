@@ -154,8 +154,15 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>The costs of the resources for one billing period (one month)</returns>
         public ResourceCostData GetResourceCostsForPeriod(string offerDurableId, string currency, string locale, string regionInfo, int yearOfBeginningPeriod, int monthOfBeginningPeriod, string token = null)
         {
-            DateTime startDate = new DateTime(yearOfBeginningPeriod, monthOfBeginningPeriod, 14);
+            DateTime startDate = new DateTime(yearOfBeginningPeriod, monthOfBeginningPeriod, 14, 0,0,0, DateTimeKind.Utc);
+            if (startDate > DateTime.Now.ToUniversalTime())
+                throw new ArgumentException("The beginning of the period can not be in the future!");
             DateTime endDate = startDate.AddMonths(1).AddHours(-1);
+
+            if(endDate > DateTime.Now.ToUniversalTime())
+            {
+                endDate = DateTime.Now.ToUniversalTime();
+            }
 
             return GetResourceCosts(offerDurableId, currency, locale, regionInfo, startDate, endDate, AggregationGranularity.Hourly, true, token);
         }

@@ -1,9 +1,9 @@
 # AzureBillingApi
 .net library that reads data from the azure rest billing apis.
 
-Currently works best if start and end date are the same as the billing period (cycle). If it's not, then the cost calculation could be wrong because of the included units and different meter rates.
+Currently works best if start and end date are the same as the billing period (cycle). **If it's not, then the cost calculation could be wrong because of the included units and different meter rates.**
 
-***more detailed description will follow***
+Please find a detailed description at my blog: https://codehollow.com/2017/02/using-the-azure-billing-api-to-calculate-the-costs/
 
 ## Usage
 ### Getting the costs (combination of usage data and ratecard data)
@@ -65,10 +65,7 @@ foreach(var meter in ratecardData.Meters)
       * if 5 GB data transfer is for free and you have 4 GB in each period - then it should be free. But in the given timespan (2 periods) - it's summed up to 8 GB and the library returns the costs for 3 GB.
 2. Documentation
    * Troubleshoot section in readme file
-   * blog post
-   * configuration of active directory
-   * parameters in Console
+   * parameters in sample console
    * billing period as parameters
-3. NuGet package
-4. Code improvements
+4. Code improvements?
 5. ... 
