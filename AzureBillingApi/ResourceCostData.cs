@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CodeHollow.AzureBillingApi.RateCard;
 
 namespace CodeHollow.AzureBillingApi
@@ -22,5 +20,17 @@ namespace CodeHollow.AzureBillingApi
         /// The whole ratecard data set.
         /// </summary>
         public RateCardData RateCardData { get; set; }
+
+        /// <summary>
+        /// Returns the sum of all calculated costs (in <see cref=" Costs"/>)
+        /// </summary>
+        public double TotalCosts
+        {
+            get
+            {
+                return Costs.Sum(x => x.CalculatedCosts);
+            }
+        }
+       
     }
 }

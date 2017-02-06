@@ -9,8 +9,11 @@ namespace CodeHollow.AzureBillingApi
 {
     /// <summary>
     /// Client to read data from the Azure billing REST APIs.
-    /// Allows to get data from the usage api <see cref="UsageClient"/> or from
-    /// the ratecard api <see cref="RateCardClient"/>.
+    /// Allows to get data from the usage api <see cref="UsageClient"/>, from
+    /// the ratecard api <see cref="RateCardClient"/> or get the combination of
+    /// the usage and ratecard data <see cref="GetResourceCosts(string, string, string, string, DateTime, DateTime, AggregationGranularity, bool, string)"/>.
+    /// Requires registration of an application in the active directory configuration in the azure portal.
+    /// Please check https://github.com/codehollow/AzureBillingApi for more details.
     /// </summary>
     public class Client
     {
@@ -135,6 +138,26 @@ namespace CodeHollow.AzureBillingApi
             var rateCardData = GetRateCardData(offerDurableId, currency, locale, regionInfo, token);
             var usageData = GetUsageData(startDate, endDate, granularity, showDetails, token);
             return Combine(rateCardData, usageData);
+        }
+
+        /// <summary>
+        /// Returns the usage and costs for one billing period (cycle). Billing cycle is automatically set to
+        /// e.g. 14.12.2016 - 13.1.2017 23:59. 
+        /// </summary>
+        /// <param name="offerDurableId">Offer - e.g. MS-AZR-0003p (see: https://azure.microsoft.com/en-us/support/legal/offer-details/) </param>
+        /// <param name="currency">the currency - e.g. EUR or USD</param>
+        /// <param name="locale">the locale - e.g. de-AT or en-US</param>
+        /// <param name="regionInfo">the region - e.g. DE, AT or US</param>
+        /// <param name="yearOfBeginningPeriod">year of the beginning of the billing cycle - e.g. 2016</param>
+        /// <param name="monthOfBeginningPeriod">month of the beginning of the billing cycle - e.g. 12</param>
+        /// <param name="token">the OAuth token</param>
+        /// <returns>The costs of the resources for one billing period (one month)</returns>
+        public ResourceCostData GetResourceCostsForPeriod(string offerDurableId, string currency, string locale, string regionInfo, int yearOfBeginningPeriod, int monthOfBeginningPeriod, string token = null)
+        {
+            DateTime startDate = new DateTime(yearOfBeginningPeriod, monthOfBeginningPeriod, 14);
+            DateTime endDate = startDate.AddMonths(1).AddHours(-1);
+
+            return GetResourceCosts(offerDurableId, currency, locale, regionInfo, startDate, endDate, AggregationGranularity.Hourly, true, token);
         }
 
         /// <summary>
