@@ -71,5 +71,4 @@ foreach(var meter in ratecardData.Meters)
    * billing period as parameters
 3. NuGet package
 4. Code improvements
-   * Method to get the data of a invoice period
 5. ... 

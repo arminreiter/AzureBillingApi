@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AzureBillingApi")]
-[assembly: AssemblyDescription(".net library that reads data from the azure rest billing (ratecard and usage) apis")]
+[assembly: AssemblyDescription(".net library that reads data from the azure rest billing (ratecard and usage) apis and calculates the costs.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Armin Reiter")]
 [assembly: AssemblyProduct("AzureBillingApi")]
