@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/codehollow/AzureBillingApi/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Fixed cost calculation, add support for billing cycles.</releaseNotes>
+    <releaseNotes>Fixed issue with GetResourceCostsForPeriod.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>azure billing billingapi windowsazure microsoftazure managementapi azuremanagementapi</tags>
   </metadata>

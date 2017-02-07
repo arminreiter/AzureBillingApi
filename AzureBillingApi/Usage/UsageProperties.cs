@@ -78,6 +78,9 @@ namespace CodeHollow.AzureBillingApi.Usage
         {
             get
             {
+                if (String.IsNullOrEmpty(InstanceDataRaw))
+                    return null;
+
                 return JsonConvert.DeserializeObject<InstanceDataType>(InstanceDataRaw.Replace("\\\"", ""));
             }
         }

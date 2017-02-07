@@ -12,7 +12,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
     class Program
     {
         const char SEP = ';';
-        
+
         static void Main(string[] args)
         {
             Client c = new Client(
@@ -31,10 +31,10 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 
             Console.WriteLine("Resource costs: ");
 
-            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0003p", "EUR", "de-AT", "AT",2016,11);
+            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0017P", "EUR", "en-US", "AT", 2017, 1);
 
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
-                new DateTime(2016, 11, 14, 0, 0, 0), new DateTime(2016, 12, 13, 23, 0, 0), AggregationGranularity.Hourly, true);
+                new DateTime(2017, 1, 14, 0, 0, 0), new DateTime(2017, 2, 26, 23, 0, 0), AggregationGranularity.Daily, true);
 
 
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
@@ -42,12 +42,12 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             //PrintResources(resourceData);
 
             // Create CSV:
-            //var rccsv = CreateCsv(combined.Select(x => x.RateCardMeter).ToList());
-            //System.IO.File.WriteAllText("c:\\data\\rc.csv", rccsv);
-            //var uscsv = CreateCsv(combined.Select(x => x.UsageValue).ToList());
-            //System.IO.File.WriteAllText("c:\\data\\us.csv", uscsv);
+            //var rccsv = CreateCsv(resourceData.Costs.Select(x => x.RateCardMeter).ToList());
+            //System.IO.File.WriteAllText("c:\\data\\rc.csv", rccsv, Encoding.UTF8);
+            //var uscsv = CreateCsv(resourceData.Costs.Select(x => x.UsageValue).ToList());
+            //System.IO.File.WriteAllText("c:\\data\\us.csv", uscsv, Encoding.UTF8);
             //var csv = CreateCsv(resourceData);
-            //System.IO.File.WriteAllText("c:\\data\\resourcecosts.csv", csv);
+            //System.IO.File.WriteAllText("c:\\data\\resourcecosts.csv", csv, Encoding.UTF8);
 
             Console.WriteLine("Press key to exit!");
             Console.ReadKey();
@@ -120,24 +120,25 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 
             var resourceNames = data.GetResourceNames();
 
-            foreach (var resource in resourceNames)
+            System.Threading.Tasks.Parallel.ForEach(resourceNames, resource =>
             {
                 var resourceValues = data.Costs.GetCostsByResourceName(resource);
-                var meterIds = (from x in resourceValues select x.RateCardMeter.MeterId).Distinct();
+                var meterIds = resourceValues.GetUsedMeterIds();
 
-                foreach (var x in meterIds)
+                System.Threading.Tasks.Parallel.ForEach(meterIds, x =>
                 {
-                    var currates = (from y in resourceValues where y.RateCardMeter.MeterId.Equals(x) select y);
-                    string metername = currates.First().UsageValue.Properties.MeterName;
+                    var currates = resourceValues.GetCostsByMeterId(x);
+                    string metername = data.GetMeterById(x).MeterName;
                     var curcosts = currates.Sum(y => y.CalculatedCosts);
                     var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
 
                     var billable = currates.Sum(y => y.BillableUnits);
-                    var curusagevalue = currates.First().UsageValue;
-                    
+
                     sb.AppendLine($"{resource}{SEP}{metername}{SEP}{usage.Print()}{SEP}{billable.Print()}{SEP}{curcosts.Print()}");
-                }
-            }
+                });
+            });
+
+            
             return sb.ToString();
 
         }
@@ -163,7 +164,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
         private static void PrintResources(ResourceCostData data)
         {
             var resourceNames = data.GetResourceNames();
-            
+
             foreach (var resource in resourceNames)
             {
                 var resourceValues = data.Costs.GetCostsByResourceName(resource);
@@ -175,7 +176,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                     string metername = data.GetMeterById(x).MeterName;
                     var curcosts = currates.Sum(y => y.CalculatedCosts);
                     var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
-                    
+
                     Console.WriteLine(resource.PadRight(20) + ": " + metername.PadRight(72) + " : " + usage.Print() + " - " + curcosts.Print());
                 }
             }

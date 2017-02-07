@@ -18,7 +18,7 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>filtered costs where resource name equals the given resource name</returns>
         public static IEnumerable<ResourceCosts> GetCostsByResourceName(this IEnumerable<ResourceCosts> costs, string resourceName)
         {
-            return from x in costs where x.UsageValue.ResourceName.Equals(resourceName) select x;
+            return from x in costs where (x.UsageValue.ResourceName ?? String.Empty).Equals(resourceName) select x;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>list of all resource names</returns>
         public static IEnumerable<string> GetResourceNames(this IEnumerable<ResourceCosts> costs)
         {
-            return costs.Select(x => x.UsageValue.ResourceName).Distinct();
+            return costs.Select(x => x.UsageValue.ResourceName ?? String.Empty).Distinct();
         }
 
         /// <summary>

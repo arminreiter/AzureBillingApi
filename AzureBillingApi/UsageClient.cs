@@ -69,19 +69,23 @@ namespace CodeHollow.AzureBillingApi
             if (startDate >= endDate)
                 throw new ArgumentException("Start date must be before the end date!");
 
+            if (endDate >= DateTime.Now.AddHours(-1))
+            {
+                endDate = DateTime.Now.AddHours(-1).ToUniversalTime();
+            }
+
             DateTimeOffset startTime = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, DateTimeKind.Utc);
             DateTimeOffset endTime = new DateTime(endDate.Year, endDate.Month, endDate.Day, 0, 0, 0, DateTimeKind.Utc);
-
-            if(granularity == AggregationGranularity.Hourly)
+            
+            if (granularity == AggregationGranularity.Hourly)
             {
                 startTime = startTime.AddHours(startDate.Hour);
                 endTime = endTime.AddHours(endDate.Hour);
             }
-            
+
             string st = WebUtility.UrlEncode(startTime.ToString("yyyy-MM-ddTHH:mm:sszzz"));
             string et = WebUtility.UrlEncode(endTime.ToString("yyyy-MM-ddTHH:mm:sszzz"));
             string url = $"https://management.azure.com/subscriptions/{SubscriptionId}/providers/Microsoft.Commerce/UsageAggregates?api-version={APIVERSION}&reportedStartTime={st}&reportedEndTime={et}&aggregationGranularity={granularity.ToString()}&showDetails={showDetails.ToString().ToLower()}";
-
             
             string data = GetData(url, token);
             if (String.IsNullOrEmpty(data))

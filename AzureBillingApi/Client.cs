@@ -166,12 +166,7 @@ namespace CodeHollow.AzureBillingApi
             if (startDate > DateTime.Now.ToUniversalTime())
                 throw new ArgumentException("The beginning of the period can not be in the future!");
             DateTime endDate = startDate.AddMonths(1).AddHours(-1);
-
-            if(endDate > DateTime.Now.ToUniversalTime())
-            {
-                endDate = DateTime.Now.ToUniversalTime();
-            }
-
+            
             return GetResourceCosts(offerDurableId, currency, locale, regionInfo, startDate, endDate, AggregationGranularity.Hourly, true, token);
         }
 
