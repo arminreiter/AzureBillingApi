@@ -193,7 +193,10 @@ namespace CodeHollow.AzureBillingApi
             foreach (var usageValue in usageData.Values)
             {
                 string meterId = usageValue.Properties.MeterId;
-                var rateCard = (from x in rateCardData.Meters where x.MeterId == meterId select x).First();
+                var rateCard = (from x in rateCardData.Meters where x.MeterId.Equals(meterId, StringComparison.InvariantCultureIgnoreCase) select x).FirstOrDefault();
+
+                if (rateCard == null) // e.g. ApplicationInsights: there is no ratecard data for these
+                    continue;
 
                 var billingCycleId = GetBillingCycleIdentifier(usageValue.Properties.UsageStartTimeAsDate);
                 if (!aggQuant[meterId].ContainsKey(billingCycleId))

@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/codehollow/AzureBillingApi/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Fixed issue with GetResourceCostsForPeriod.</releaseNotes>
+    <releaseNotes>Fixed issue with combination of usage and ratecard data where no ratecard data is available for a meter that exists in the usage data.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>azure billing billingapi windowsazure microsoftazure managementapi azuremanagementapi</tags>
   </metadata>
