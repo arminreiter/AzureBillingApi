@@ -11,7 +11,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 {
     class Program
     {
-        const char SEP = ';';
+        const char SEP = ';'; // seperator for CSV export
 
         static void Main(string[] args)
         {
@@ -21,38 +21,54 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[CLIENTSECRET]",
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
-            
-            // How to get ratecard and usage data separated and combine it:
-            /*
-            var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
-            var ratecardData = c.GetRateCardData("MS-AZR-0003p", "EUR", "de-AT", "AT");
-            var combined = Client.Combine(ratecardData, usageData);
-            */
 
-            Console.WriteLine("Resource costs: ");
-
-            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0017P", "EUR", "en-US", "AT", 2017, 1);
+            // This is how you can get usage data:
+            // var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
+            // This is how to get ratecard data:
+            // var ratecardData = c.GetRateCardData("MS-AZR-0003p", "EUR", "de-AT", "AT");
+            // Thats how to combine usage and ratecard data
+            // var combined = Client.Combine(ratecardData, usageData);
 
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
                 new DateTime(2017, 1, 14, 0, 0, 0), new DateTime(2017, 2, 26, 23, 0, 0), AggregationGranularity.Daily, true);
 
-
+            // The correct values for one billing period can be received via GetResourceCostsForPeriod
+            // It uses the GetResourceCosts with e.g. 20170114 00:00 - 20170213 23:00 and Hourly aggregation
+            // Thats why it's a bit slow. Using Daily aggregation is faster, but it doesn't return the same values as in the bill.
+            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0017P", "EUR", "en-US", "AT", 2017, 1);
+            
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
-            PrintMeters(resourceData);
-            //PrintResources(resourceData);
+            PrintMeters(resourceData); // Print costs per meter
+            //PrintResources(resourceData); // Print costs per resourcename per meter
 
+            string csvPath = EnterCsvPath(); // Export to CSV?
+            if (string.IsNullOrEmpty(csvPath))
+                return;
+            
             // Create CSV:
-            //var rccsv = CreateCsv(resourceData.Costs.Select(x => x.RateCardMeter).ToList());
-            //System.IO.File.WriteAllText("c:\\data\\rc.csv", rccsv, Encoding.UTF8);
-            //var uscsv = CreateCsv(resourceData.Costs.Select(x => x.UsageValue).ToList());
-            //System.IO.File.WriteAllText("c:\\data\\us.csv", uscsv, Encoding.UTF8);
-            //var csv = CreateCsv(resourceData);
-            //System.IO.File.WriteAllText("c:\\data\\resourcecosts.csv", csv, Encoding.UTF8);
+            // Create CSV with ratecard data
+            var rccsv = CreateCsv(resourceData.Costs.Select(x => x.RateCardMeter).ToList());
+            System.IO.File.WriteAllText(GetCsvPath(csvPath, "ratecard.csv"), rccsv, Encoding.UTF8);
+            Console.WriteLine("created ratecard.csv");
 
-            Console.WriteLine("Press key to exit!");
-            Console.ReadKey();
+            // Create CSV with usage data
+            var uscsv = CreateCsv(resourceData.Costs.Select(x => x.UsageValue).ToList());
+            System.IO.File.WriteAllText(GetCsvPath(csvPath, "usage.csv"), uscsv, Encoding.UTF8);
+            Console.WriteLine("created usage.csv");
+
+            // Create CSV with costs
+            var csv = CreateCsv(resourceData);
+            System.IO.File.WriteAllText(GetCsvPath(csvPath, "costs.csv"), csv, Encoding.UTF8);
+            Console.WriteLine("created costs.csv");
+
+            System.Diagnostics.Process.Start(csvPath);
         }
 
+        /// <summary>
+        /// Creates a csv file containing the costs per meter (ratecard data)
+        /// </summary>
+        /// <param name="meters">ratecard data</param>
+        /// <returns></returns>
         public static string CreateCsv(List<Meter> meters)
         {
             StringBuilder sb = new StringBuilder();
@@ -113,6 +129,11 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             return sb.ToString();
         }
 
+        /// <summary>
+        /// creates a csv file with the usage including the costs
+        /// </summary>
+        /// <param name="data">data from the resource cost data</param>
+        /// <returns>csv file as string</returns>
         public static string CreateCsv(ResourceCostData data)
         {
             StringBuilder sb = new StringBuilder();
@@ -120,6 +141,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
 
             var resourceNames = data.GetResourceNames();
 
+            object sblock = new object();
             System.Threading.Tasks.Parallel.ForEach(resourceNames, resource =>
             {
                 var resourceValues = data.Costs.GetCostsByResourceName(resource);
@@ -133,16 +155,20 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                     var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
 
                     var billable = currates.Sum(y => y.BillableUnits);
-
-                    sb.AppendLine($"{resource}{SEP}{metername}{SEP}{usage.Print()}{SEP}{billable.Print()}{SEP}{curcosts.Print()}");
+                    lock (sblock)
+                    {
+                        sb.AppendLine($"{resource}{SEP}{metername}{SEP}{usage.Print()}{SEP}{billable.Print()}{SEP}{curcosts.Print()}");
+                    }
                 });
             });
-
             
             return sb.ToString();
-
         }
 
+        /// <summary>
+        /// Print usage and costs to the console, aggregated by meters
+        /// </summary>
+        /// <param name="resourceCosts">the resource cost data</param>
         private static void PrintMeters(ResourceCostData resourceCosts)
         {
             var meterIds = resourceCosts.GetUsedMeterIds();
@@ -161,6 +187,10 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             }
         }
 
+        /// <summary>
+        /// Print usage and costs to the console, aggregated by resource names and meters
+        /// </summary>
+        /// <param name="data"></param>
         private static void PrintResources(ResourceCostData data)
         {
             var resourceNames = data.GetResourceNames();
@@ -180,6 +210,36 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                     Console.WriteLine(resource.PadRight(20) + ": " + metername.PadRight(72) + " : " + usage.Print() + " - " + curcosts.Print());
                 }
             }
+        }
+
+        /// <summary>
+        /// Reads csv folder path from user input
+        /// </summary>
+        /// <returns></returns>
+        private static string EnterCsvPath()
+        {
+            Console.WriteLine("Please enter a path (folder) for the CSV files, leave empty to skip generation of CSV files:");
+            string csvPath = string.Empty;
+            do
+            {
+                if (!string.IsNullOrEmpty(csvPath))
+                    Console.WriteLine(csvPath + " does not exist, try again: ");
+                csvPath = Console.ReadLine();
+            }
+            while (!System.IO.Directory.Exists(csvPath) || String.IsNullOrEmpty(csvPath));
+
+            return csvPath;
+        }
+
+        /// <summary>
+        /// Combines folder and filename and adds the current date to the filename
+        /// </summary>
+        /// <param name="folder">path of the folder where the file will be stored</param>
+        /// <param name="filename">name of the file</param>
+        /// <returns>folder + date + filename - e.g. c:\data\20170228_myfile.csv</returns>
+        private static string GetCsvPath(string folder, string filename)
+        {
+            return System.IO.Path.Combine(folder, DateTime.Now.ToString("yyyyMMdd") + "_" + filename);
         }
     }
 
