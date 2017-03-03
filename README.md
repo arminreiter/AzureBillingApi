@@ -1,10 +1,10 @@
 # AzureBillingApi
 .net library that reads data from the azure rest billing apis. It can be used to:
- - Read data from the Azure billing *RateCard API*
- - Read data from the Azure billing *Usage API*
+ - Read data from the Azure billing **RateCard API**
+ - Read data from the Azure billing **Usage API**
  - Read data from both APIs and combine them to calculate the costs (without tax).
 
-This library is also available as *NuGet Package* (https://www.nuget.org/packages/CodeHollow.AzureBillingApi/)
+This library is also available as **NuGet Package** (https://www.nuget.org/packages/CodeHollow.AzureBillingApi/)
 
 A detailed description can be found at my blog: https://codehollow.com/2017/02/using-the-azure-billing-api-to-calculate-the-costs/
 
@@ -59,12 +59,41 @@ foreach(var meter in ratecardData.Meters)
 }
 ```
 
+### Get usage and ratecard data and combine them:
+```csharp
+Client c = new Client("mytenant.onmicrosoft.com", "[CLIENTID]",
+    "[CLIENTSECRET]", "[SUBSCRIPTIONID]", "http://[REDIRECTURL]");
 
-## TODO
+var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
+var ratecardData = c.GetRateCardData("MS-AZR-0003p", "EUR", "de-AT", "AT");
+var combined = Client.Combine(ratecardData, usageData);
+
+var costs = from x in combined.Costs select x.CalculatedCosts;
+var totalCosts = costs.Sum();
+```
+
+### Get usage and costs for a period
+This can be achieved with the build in method *GetResourceCostsForPeriod*:
+
+```csharp
+Client c = new Client("mytenant.onmicrosoft.com", "[CLIENTID]",
+    "[CLIENTSECRET]", "[SUBSCRIPTIONID]", "http://[REDIRECTURL]");
+var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0017P", "EUR", "en-US", "AT", 2017, 1);
+```
+This method could be **slow**, because the correct values for one billing cycle (so that it's the same as on the bill) are determined with the parameters:
+- Start date: e.g. 14.01.2017 00:00
+- End date: e.g. 13.02.2017 23:00
+- Aggregation granularity: **Hourly**
+
+That's the reason why *GetResourceCostsForPeriod* reads the usage value with hourly granularity which takes some time. You could use the GetResourceCosts with Daily aggregation to speed it up, but the resulting costs per meter/resource/totalcosts will not be the exact same as on the bill:
+
+```csharp
+Client c = new Client("mytenant.onmicrosoft.com", "[CLIENTID]", "[CLIENTSECRET]", "[SUBSCRIPTIONID]", "http://[REDIRECTURL]");
+var resourceCosts = c.GetResourceCosts("MS-AZR-0003p", "EUR", "en-US", "AT",
+            new DateTime(2017, 1, 14), new DateTime(2017, 2, 13), AggregationGranularity.Daily, true);
+```
+
+## Improvements (todo)
 * Documentation
    * Troubleshoot section in readme file
-   * parameters in sample console
-   * billing period as parameters
 * Add tax parameter
-* Add unit test
-* Code improvements

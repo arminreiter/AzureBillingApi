@@ -11,7 +11,7 @@ namespace AzureBillingApi.Tests
     public class CalculationTest
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestCostCalculation1()
         {
             RateCardData rc = GetRateCardTestData();
             var ud = new UsageData();
@@ -34,7 +34,7 @@ namespace AzureBillingApi.Tests
         }
 
         [TestMethod]
-        public void TestMethod2()
+        public void TestCostCalculation2()
         {
             string[] usageData = new string[]
             {
@@ -44,7 +44,7 @@ namespace AzureBillingApi.Tests
         }
 
         [TestMethod]
-        public void TestMethod3()
+        public void TestCostCalculation3()
         {
             string[] usageData = new string[]
             {
@@ -54,7 +54,7 @@ namespace AzureBillingApi.Tests
         }
 
         [TestMethod]
-        public void TestMethod4()
+        public void TestCostCalculation4()
         {
             string[] usageData = new string[]
             {
@@ -64,7 +64,7 @@ namespace AzureBillingApi.Tests
         }
 
         [TestMethod]
-        public void TestMethod5()
+        public void TestCostCalculation5()
         {
             string[] usageData = new string[]
             {

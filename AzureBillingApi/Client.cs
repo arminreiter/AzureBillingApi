@@ -15,6 +15,11 @@ namespace CodeHollow.AzureBillingApi
     /// Requires registration of an application in the active directory configuration in the azure portal.
     /// Please check https://github.com/codehollow/AzureBillingApi for more details.
     /// </summary>
+    /// <example>
+    /// Client c = new Client("[TENANT].onmicrosoft.com", "[CLIENTID]", "[CLIENTSECRET]", "[SUBSCRIPTIONID]", "http://[REDIRECTURL]");
+    /// var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT", new DateTime(2017, 1, 14, 0, 0, 0), new DateTime(2017, 2, 26, 23, 0, 0), AggregationGranularity.Daily, true);
+    /// Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
+    /// </example>
     public class Client
     {
         #region Properties

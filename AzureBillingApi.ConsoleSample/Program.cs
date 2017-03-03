@@ -22,20 +22,8 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
 
-            // This is how you can get usage data:
-            // var usageData = c.GetUsageData(new DateTime(2017, 1, 14, 0, 0, 0), DateTime.Now, Usage.AggregationGranularity.Daily, true);
-            // This is how to get ratecard data:
-            // var ratecardData = c.GetRateCardData("MS-AZR-0003p", "EUR", "de-AT", "AT");
-            // Thats how to combine usage and ratecard data
-            // var combined = Client.Combine(ratecardData, usageData);
-
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
                 new DateTime(2017, 1, 14, 0, 0, 0), new DateTime(2017, 2, 26, 23, 0, 0), AggregationGranularity.Daily, true);
-
-            // The correct values for one billing period can be received via GetResourceCostsForPeriod
-            // It uses the GetResourceCosts with e.g. 20170114 00:00 - 20170213 23:00 and Hourly aggregation
-            // Thats why it's a bit slow. Using Daily aggregation is faster, but it doesn't return the same values as in the bill.
-            //var resourceData = c.GetResourceCostsForPeriod("MS-AZR-0017P", "EUR", "en-US", "AT", 2017, 1);
             
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData); // Print costs per meter
@@ -45,7 +33,6 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             if (string.IsNullOrEmpty(csvPath))
                 return;
             
-            // Create CSV:
             // Create CSV with ratecard data
             var rccsv = CreateCsv(resourceData.Costs.Select(x => x.RateCardMeter).ToList());
             System.IO.File.WriteAllText(GetCsvPath(csvPath, "ratecard.csv"), rccsv, Encoding.UTF8);
@@ -61,7 +48,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             System.IO.File.WriteAllText(GetCsvPath(csvPath, "costs.csv"), csv, Encoding.UTF8);
             Console.WriteLine("created costs.csv");
 
-            System.Diagnostics.Process.Start(csvPath);
+            System.Diagnostics.Process.Start(csvPath); // start explorer
         }
 
         /// <summary>
