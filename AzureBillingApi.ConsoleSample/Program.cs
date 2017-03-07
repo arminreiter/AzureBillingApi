@@ -23,7 +23,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "http://[REDIRECTURL]");
 
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
-                new DateTime(2017, 1, 14, 0, 0, 0), new DateTime(2017, 2, 26, 23, 0, 0), AggregationGranularity.Daily, true);
+                new DateTime(2017, 3, 1, 0, 0, 0), new DateTime(2017, 3, 6, 23, 0, 0), AggregationGranularity.Daily, true);
             
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData); // Print costs per meter
@@ -213,7 +213,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                     Console.WriteLine(csvPath + " does not exist, try again: ");
                 csvPath = Console.ReadLine();
             }
-            while (!System.IO.Directory.Exists(csvPath) || String.IsNullOrEmpty(csvPath));
+            while (!System.IO.Directory.Exists(csvPath) && !String.IsNullOrEmpty(csvPath));
 
             return csvPath;
         }
