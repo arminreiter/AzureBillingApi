@@ -61,7 +61,7 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>the meter that matches the meterId</returns>
         public static Meter GetMeterById(this IEnumerable<ResourceCosts> costs, string meterId)
         {
-            return costs.Select(x => x.RateCardMeter).Where(x => x.MeterId.Equals(meterId, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            return costs.Select(x => x.RateCardMeter).Where(x => x.MeterId.Equals(meterId, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
 
         /// <summary>

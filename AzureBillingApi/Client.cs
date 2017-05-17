@@ -183,10 +183,12 @@ namespace CodeHollow.AzureBillingApi
         /// <returns>The costs of the resources (combined data of ratecard and usage api)</returns>
         public static ResourceCostData Combine(RateCard.RateCardData rateCardData, Usage.UsageData usageData)
         {
-            ResourceCostData rcd = new ResourceCostData();
-            rcd.Costs = new List<ResourceCosts>();
-            rcd.RateCardData = rateCardData;
-            
+            ResourceCostData rcd = new ResourceCostData()
+            {
+                Costs = new List<ResourceCosts>(),
+                RateCardData = rateCardData
+            };
+
             // get all used meter ids
             var meterIds = (from x in usageData.Values select x.Properties.MeterId).Distinct().ToList();
 
@@ -198,7 +200,7 @@ namespace CodeHollow.AzureBillingApi
             foreach (var usageValue in usageData.Values)
             {
                 string meterId = usageValue.Properties.MeterId;
-                var rateCard = (from x in rateCardData.Meters where x.MeterId.Equals(meterId, StringComparison.InvariantCultureIgnoreCase) select x).FirstOrDefault();
+                var rateCard = (from x in rateCardData.Meters where x.MeterId.Equals(meterId, StringComparison.OrdinalIgnoreCase) select x).FirstOrDefault();
 
                 if (rateCard == null) // e.g. ApplicationInsights: there is no ratecard data for these
                     continue;
@@ -269,8 +271,7 @@ namespace CodeHollow.AzureBillingApi
             // add included quantity to meter rates with cost 0
             if (includedQuantity > 0)
             {
-                modifiedMeterRates = new Dictionary<double, double>();
-                modifiedMeterRates.Add(0, 0);
+                modifiedMeterRates = new Dictionary<double, double> { { 0, 0 } };
 
                 foreach (var rate in meterRates)
                 {

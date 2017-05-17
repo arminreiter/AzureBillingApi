@@ -5,7 +5,6 @@ namespace CodeHollow.AzureBillingApi.Usage
     /// <summary>
     /// Usage entry of the usage rest api.
     /// </summary>
-    [Serializable]
     public class UsageValue
     {
         /// <summary>

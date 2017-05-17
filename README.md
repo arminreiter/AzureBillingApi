@@ -1,5 +1,5 @@
 # AzureBillingApi
-.net library that reads data from the azure rest billing apis. It can be used to:
+.net library (.net standard 1.4 and .net framework 4.5.2) that reads data from the azure rest billing apis. It can be used to:
  - Read data from the Azure billing **RateCard API**
  - Read data from the Azure billing **Usage API**
  - Read data from both APIs and combine them to calculate the costs (without tax).

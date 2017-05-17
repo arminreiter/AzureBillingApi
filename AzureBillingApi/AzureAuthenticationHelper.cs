@@ -37,8 +37,14 @@ namespace CodeHollow.AzureBillingApi
         private static AuthenticationResult GetOAuthTokenForUser(string url, string tenant, string resource, string redirectUrl, string clientId)
         {
             var authenticationContext = new AuthenticationContext(CombineUrl(url, tenant));
-            var authTask = authenticationContext.AcquireTokenAsync(resource, clientId,
-                new Uri(redirectUrl), new PlatformParameters(PromptBehavior.Auto));
+
+#if NET452
+            PlatformParameters p = new PlatformParameters(PromptBehavior.Auto);
+#else
+            PlatformParameters p = new PlatformParameters();
+#endif
+
+            var authTask = authenticationContext.AcquireTokenAsync(resource, clientId, new Uri(redirectUrl), p);
             authTask.Wait();
             return authTask.Result;
         }
