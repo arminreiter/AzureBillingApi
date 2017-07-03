@@ -22,8 +22,14 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
 
+            var yesterday = DateTime.Now.AddDays(-1);
+            var yesterdayMinusOneMonth = yesterday.AddMonths(-1);
+            var startDate = new DateTime(yesterdayMinusOneMonth.Year, yesterdayMinusOneMonth.Month, yesterdayMinusOneMonth.Day);
+            var endDate = new DateTime(yesterday.Year, yesterday.Month, yesterday.Day);
+
+            Console.WriteLine($"Get data from: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}");
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
-                new DateTime(2017, 5, 1, 0, 0, 0), new DateTime(2017, 5, 16, 23, 0, 0), AggregationGranularity.Daily, true);
+                startDate, endDate, AggregationGranularity.Daily, true);
             
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData); // Print costs per meter
