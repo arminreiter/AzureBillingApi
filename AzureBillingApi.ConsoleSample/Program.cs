@@ -21,7 +21,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[CLIENTSECRET]",
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
-
+            
             var yesterday = DateTime.Now.AddDays(-1);
             var yesterdayMinusOneMonth = yesterday.AddMonths(-1);
             var startDate = new DateTime(yesterdayMinusOneMonth.Year, yesterdayMinusOneMonth.Month, yesterdayMinusOneMonth.Day);
@@ -30,15 +30,16 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             Console.WriteLine($"Get data from: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}");
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
                 startDate, endDate, AggregationGranularity.Daily, true);
-            
+
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData); // Print costs per meter
             //PrintResources(resourceData); // Print costs per resourcename per meter
 
+
             string csvPath = EnterCsvPath(); // Export to CSV?
             if (string.IsNullOrEmpty(csvPath))
                 return;
-            
+
             // Create CSV with ratecard data
             var rccsv = CreateCsv(resourceData.Costs.Select(x => x.RateCardMeter).ToList());
             System.IO.File.WriteAllText(GetCsvPath(csvPath, "ratecard.csv"), rccsv, Encoding.UTF8);
@@ -123,6 +124,29 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
         }
 
         /// <summary>
+        /// creates a csv file with costs per resource group
+        /// </summary>
+        /// <param name="data">data from the usage api</param>
+        /// <returns>csv file as string</returns>
+        public static string CreateCsvByResourceGroup(ResourceCostData data)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"ResourceGroup{SEP}Usage{SEP}Billable{SEP}Costs{SEP}");
+
+            var costs = data.GetCostsByResourceGroup();
+
+            foreach(var resourceGroup in costs.Keys)
+            {
+                var curcosts = costs[resourceGroup].GetTotalCosts();
+                var usage = costs[resourceGroup].GetTotalUsage();
+                var billable = costs[resourceGroup].GetTotalBillable();
+                sb.AppendLine($"{resourceGroup}{SEP}{usage}{SEP}{billable}{SEP}{curcosts}{SEP}");
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// creates a csv file with the usage including the costs
         /// </summary>
         /// <param name="data">data from the resource cost data</param>
@@ -130,30 +154,28 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
         public static string CreateCsv(ResourceCostData data)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Resource{SEP}Meter Name{SEP}Usage{SEP}Billable{SEP}Costs{SEP}");
-
+            sb.AppendLine($"ResourceGroup{SEP}Resource{SEP}Meter Name{SEP}Usage{SEP}Billable{SEP}Costs{SEP}");
+            
             var resourceNames = data.GetResourceNames();
 
-            object sblock = new object();
-            System.Threading.Tasks.Parallel.ForEach(resourceNames, resource =>
+            var costs = from costsByResourceGroup in data.GetCostsByResourceGroup()
+                        from costsByResourceName in costsByResourceGroup.Value.GetCostsByResourceName()
+                        from costsByMeterName in costsByResourceName.Value.GetCostsByMeterName()
+                        select new
+                        {
+                            ResourceGroup = costsByResourceGroup.Key,
+                            Resource = costsByResourceName.Key,
+                            MeterName = costsByMeterName.Key,
+                            Costs = costsByMeterName.Value
+                        };
+            
+            foreach (var c in costs)
             {
-                var resourceValues = data.Costs.GetCostsByResourceName(resource);
-                var meterIds = resourceValues.GetUsedMeterIds();
-
-                System.Threading.Tasks.Parallel.ForEach(meterIds, x =>
-                {
-                    var currates = resourceValues.GetCostsByMeterId(x);
-                    string metername = data.GetMeterById(x).MeterName;
-                    var curcosts = currates.Sum(y => y.CalculatedCosts);
-                    var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
-
-                    var billable = currates.Sum(y => y.BillableUnits);
-                    lock (sblock)
-                    {
-                        sb.AppendLine($"{resource}{SEP}{metername}{SEP}{usage.Print()}{SEP}{billable.Print()}{SEP}{curcosts.Print()}");
-                    }
-                });
-            });
+                var curcosts = c.Costs.GetTotalCosts();
+                var usage = c.Costs.GetTotalUsage();
+                var billable = c.Costs.GetTotalBillable();
+                sb.AppendLine($"{c.ResourceGroup}{SEP}{c.Resource}{SEP}{c.MeterName}{SEP}{usage.Print()}{SEP}{billable.Print()}{SEP}{curcosts.Print()}");
+            }
             
             return sb.ToString();
         }
@@ -186,21 +208,16 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
         /// <param name="data"></param>
         private static void PrintResources(ResourceCostData data)
         {
-            var resourceNames = data.GetResourceNames();
+            var costs = data.GetCostsByResourceNameAndMeterName();
 
-            foreach (var resource in resourceNames)
+            foreach(var resource in costs.Keys)
             {
-                var resourceValues = data.Costs.GetCostsByResourceName(resource);
-                var meterIds = resourceValues.GetUsedMeterIds();
-
-                foreach (var x in meterIds)
+                foreach(var meter in costs[resource].Keys)
                 {
-                    var currates = resourceValues.GetCostsByMeterId(x);
-                    string metername = data.GetMeterById(x).MeterName;
-                    var curcosts = currates.Sum(y => y.CalculatedCosts);
-                    var usage = currates.Sum(y => y.UsageValue.Properties.Quantity);
+                    var curcosts = costs[resource][meter].Sum(y => y.CalculatedCosts);
+                    var usage = costs[resource][meter].Sum(y => y.UsageValue.Properties.Quantity);
 
-                    Console.WriteLine(resource.PadRight(20) + ": " + metername.PadRight(72) + " : " + usage.Print() + " - " + curcosts.Print());
+                    Console.WriteLine(resource.PadRight(20) + ": " + meter.PadRight(72) + " : " + usage.Print() + " - " + curcosts.Print());
                 }
             }
         }
