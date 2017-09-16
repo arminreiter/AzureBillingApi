@@ -21,7 +21,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
                 "[CLIENTSECRET]",
                 "[SUBSCRIPTIONID]",
                 "http://[REDIRECTURL]");
-            
+
             var yesterday = DateTime.Now.AddDays(-1);
             var yesterdayMinusOneMonth = yesterday.AddMonths(-1);
             var startDate = new DateTime(yesterdayMinusOneMonth.Year, yesterdayMinusOneMonth.Month, yesterdayMinusOneMonth.Day);
@@ -30,7 +30,7 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             Console.WriteLine($"Get data from: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}");
             var resourceData = c.GetResourceCosts("MS-AZR-0003p", "EUR", "de-AT", "AT",
                 startDate, endDate, AggregationGranularity.Daily, true);
-
+            
             Console.WriteLine(resourceData.TotalCosts + " " + resourceData.RateCardData.Currency);
             PrintMeters(resourceData); // Print costs per meter
             //PrintResources(resourceData); // Print costs per resourcename per meter
@@ -156,7 +156,6 @@ namespace CodeHollow.AzureBillingApi.ConsoleSample
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"ResourceGroup{SEP}Resource{SEP}Meter Name{SEP}Usage{SEP}Billable{SEP}Costs{SEP}");
             
-            var resourceNames = data.GetResourceNames();
 
             var costs = from costsByResourceGroup in data.GetCostsByResourceGroup()
                         from costsByResourceName in costsByResourceGroup.Value.GetCostsByResourceName()

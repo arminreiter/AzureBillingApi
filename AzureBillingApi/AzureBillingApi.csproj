@@ -4,7 +4,7 @@
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
 		<Title>AzureBillingApi</Title>
-        <Version>1.1.0.4</Version>
+        <Version>1.1.0.5</Version>
         <Copyright>Copyright 2017 codehollow.com</Copyright>
         <Description>.net library that reads data from the azure rest billing (ratecard and usage) apis and calculates the costs. (.net standard 1.4 and .net framework 4.5.2)</Description>
         <Authors>Armin Reiter</Authors>
@@ -13,9 +13,9 @@
         <PackageProjectUrl>https://github.com/codehollow/AzureBillingApi/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/codehollow/AzureBillingApi/</RepositoryUrl>
         <PackageTags>azure billing billingapi windowsazure microsoftazure managementapi azuremanagementapi</PackageTags>
-        <PackageReleaseNotes>added some extension methods that makes it easier to query the data.</PackageReleaseNotes>
-        <AssemblyVersion>1.1.0.4</AssemblyVersion>
-        <FileVersion>1.1.0.4</FileVersion>
+        <PackageReleaseNotes>fixed usage of httpclient</PackageReleaseNotes>
+        <AssemblyVersion>1.1.0.5</AssemblyVersion>
+        <FileVersion>1.1.0.5</FileVersion>
         <PackageId>CodeHollow.AzureBillingApi</PackageId>
     </PropertyGroup>
     <ItemGroup>

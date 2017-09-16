@@ -22,6 +22,9 @@ namespace CodeHollow.AzureBillingApi
     /// </example>
     public class Client
     {
+        // correct usage of HttpClient as described here: https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         #region Properties
 
         /// <summary>
@@ -235,25 +238,26 @@ namespace CodeHollow.AzureBillingApi
         /// <returns></returns>
         protected static string GetData(string url, string token)
         {
-            var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            { 
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            HttpResponseMessage response = client.SendAsync(request).Result;
+                HttpResponseMessage response = _httpClient.SendAsync(request).Result;
 
-            if (!response.IsSuccessStatusCode)
-            {
-                string errorMsg = "An error occurred! The service returned: " + response.ToString();
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorMsg = "An error occurred! The service returned: " + response.ToString();
 
-                var x = response.Content.ReadAsStringAsync();
-                x.Wait();
-                errorMsg += "Content: " + x.Result;
-                throw new Exception(errorMsg);
+                    var x = response.Content.ReadAsStringAsync();
+                    x.Wait();
+                    errorMsg += "Content: " + x.Result;
+                    throw new Exception(errorMsg);
+                }
+
+                var readTask = response.Content.ReadAsStringAsync();
+                readTask.Wait();
+                return readTask.Result;
             }
-
-            var readTask = response.Content.ReadAsStringAsync();
-            readTask.Wait();
-            return readTask.Result;
         }
         
         /// <summary>
