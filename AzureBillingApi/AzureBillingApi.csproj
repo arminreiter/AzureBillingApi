@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard1.4;net452</TargetFrameworks>
+        <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
 		<Title>AzureBillingApi</Title>
-        <Version>1.1.0.5</Version>
+        <Version>1.1.0.6</Version>
         <Copyright>Copyright 2017 codehollow.com</Copyright>
-        <Description>.net library that reads data from the azure rest billing (ratecard and usage) apis and calculates the costs. (.net standard 1.4 and .net framework 4.5.2)</Description>
+        <Description>.net library that reads data from the azure rest billing (ratecard and usage) apis and calculates the costs. (.net standard 1.4 and .net framework 4.5 and higher)</Description>
         <Authors>Armin Reiter</Authors>
         <Company>Armin Reiter</Company>
         <PackageLicenseUrl>https://github.com/codehollow/AzureBillingApi/blob/master/LICENSE</PackageLicenseUrl>
@@ -14,16 +14,17 @@
         <RepositoryUrl>https://github.com/codehollow/AzureBillingApi/</RepositoryUrl>
         <PackageTags>azure billing billingapi windowsazure microsoftazure managementapi azuremanagementapi</PackageTags>
         <PackageReleaseNotes>fixed usage of httpclient</PackageReleaseNotes>
-        <AssemblyVersion>1.1.0.5</AssemblyVersion>
-        <FileVersion>1.1.0.5</FileVersion>
+        <AssemblyVersion>1.1.0.6</AssemblyVersion>
+        <FileVersion>1.1.0.6</FileVersion>
         <PackageId>CodeHollow.AzureBillingApi</PackageId>
+        <PackageIconUrl>https://raw.githubusercontent.com/codehollow/AzureBillingApi/master/AzureBillingApi/icon.png</PackageIconUrl>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
       <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="3.13.9" />
     </ItemGroup>
 	
-	<ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net45'">
 		<Reference Include="System.Net.Http" />
 	</ItemGroup>
 </Project>

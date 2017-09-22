@@ -38,7 +38,7 @@ namespace CodeHollow.AzureBillingApi
         {
             var authenticationContext = new AuthenticationContext(CombineUrl(url, tenant));
 
-#if NET452
+#if NET45
             PlatformParameters p = new PlatformParameters(PromptBehavior.Auto);
 #else
             PlatformParameters p = new PlatformParameters();
