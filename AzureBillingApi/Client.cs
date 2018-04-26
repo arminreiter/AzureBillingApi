@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
@@ -23,7 +24,7 @@ namespace CodeHollow.AzureBillingApi
     public class Client
     {
         // correct usage of HttpClient as described here: https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient(new HttpClientHandler{ AllowAutoRedirect = false });
 
         #region Properties
 
@@ -241,23 +242,44 @@ namespace CodeHollow.AzureBillingApi
             using (var request = new HttpRequestMessage(HttpMethod.Get, url))
             { 
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = DoRequest(request);
 
-                HttpResponseMessage response = _httpClient.SendAsync(request).Result;
-
-                if (!response.IsSuccessStatusCode)
+                if (response.StatusCode == HttpStatusCode.Found)
                 {
-                    string errorMsg = "An error occurred! The service returned: " + response.ToString();
-
-                    var x = response.Content.ReadAsStringAsync();
-                    x.Wait();
-                    errorMsg += "Content: " + x.Result;
-                    throw new Exception(errorMsg);
+                    var location = response.Headers.Location;
+                    using (var redirect = new HttpRequestMessage(HttpMethod.Get, location))
+                    {
+                        response = DoRequest(redirect);
+                        return GetContentString(response);
+                    }
                 }
 
-                var readTask = response.Content.ReadAsStringAsync();
-                readTask.Wait();
-                return readTask.Result;
+                return GetContentString(response);
             }
+        }
+
+        private static string GetContentString(HttpResponseMessage response)
+        {
+            var readTask = response.Content.ReadAsStringAsync();
+            readTask.Wait();
+            return readTask.Result;
+        }
+
+        private static HttpResponseMessage DoRequest(HttpRequestMessage request)
+        {
+            var response = _httpClient.SendAsync(request).Result;
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMsg = "An error occurred! The service returned: " + response.ToString();
+
+                var x = response.Content.ReadAsStringAsync();
+                x.Wait();
+                errorMsg += "Content: " + x.Result;
+                throw new Exception(errorMsg);
+            }
+
+            return response;
         }
         
         /// <summary>
